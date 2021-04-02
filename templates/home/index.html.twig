@@ -1,0 +1,80 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+    <main role="main">
+        <section class="jumbotron text-center">
+            <div class="container py-5">
+                <form action="" class="form-inline" id="form-search">
+                    <div class="form-group col-md-6 mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="searchYear">Year</label>
+                        </div>
+                        <select class="custom-select col-md-10" id="searchYear" name="searchYear" style="width:auto;">
+                            <option selected disabled>Choose...</option>
+                            {% for year in 'now'|date('Y') .. 'now'|date('Y') + constant('App\\Controller\\DefaultController::AVAILABLE_YEARS_COUNT') %}
+                                <option value="{{ year }}" {{ searchParams.year == year ? "selected":"" }}>{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6 mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="searchCountry">Country</label>
+                        </div>
+                        <select class="custom-select col-md-10" id="searchCountry" name="searchCountry">
+                            <option selected disabled>Choose...</option>
+                            {% for country in countries %}
+                                <option value="{{ country.getCode() }}" {{ searchParams.countryCode == country.getCode() ? "selected":"" }}>{{ country.getName() }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button class="btn btn-lg btn-primary btn-block" type="submit">Search</button>
+                </form>
+            </div>
+        </section>
+        {% if app.request.get('_route') == 'search' %}
+            <div class="album py-5 bg-light" id="results">
+                {% if results.holidays_message is defined %}
+                    <div class="container text-center">
+                        <p class="lead text-muted">
+                            {{ results.holidays_message }}
+                        </p>
+                    </div>
+                {% else %}
+                    <div class="container">
+                        <p class="lead text-muted">
+                            Total amount of a public holidays: {{ results.totalHolidays }} <br/>
+                        </p>
+                        <p class="lead text-muted">
+                            Maximum number of free days: {{ results.maxFreeDays }} <br/>
+                        </p>
+                        <p class="lead text-muted">
+                            Current Day Status in {{ searchParams.year }}: {{ results.currentDayStatus }} <br/>
+                        </p>
+                        <div class="row">
+                            {% for month in results.holidaysByMonth %}
+                                <div class="col-md-3">
+                                    <div class="card mb-4 box-shadow">
+                                        <div class="card-header">
+                                            <h4 class="my-0 font-weight-normal">{{ month.name }}:</h4>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled mt-3 mb-3">
+                                                {% if month.holidays is defined %}
+                                                    {% for holiday in month.holidays %}
+                                                        <li>{{ holiday.getDate().format('d') }}
+                                                            : {{ holiday.getName() }}</li>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+        {% endif %}
+    </main>
+{% endblock %}

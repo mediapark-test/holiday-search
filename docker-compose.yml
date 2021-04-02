@@ -1,0 +1,43 @@
+version: '3'
+services:
+  php7.4:
+    build:
+      context: ./
+      args:
+        - USER_ID
+        - GROUP_ID
+    volumes:
+      - ./:/var/www/app
+    ports:
+      - "14000:80"
+    networks:
+      - network
+    depends_on:
+      - mysql5.7
+      - rabbitmq
+  mysql5.7:
+    image: mysql:5.7
+    command: mysqld --sql_mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION"
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: holidays
+      MYSQL_USER: holidays
+      MYSQL_PASSWORD: holidays
+    networks:
+      - network
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    environment:
+      RABBITMQ_DEFAULT_USER: holidays
+      RABBITMQ_DEFAULT_PASS: holidays
+    ports:
+      - 5672:5672
+    networks:
+      - network
+    depends_on:
+      - mysql5.7
+
+networks:
+  network:
+    driver: bridge
